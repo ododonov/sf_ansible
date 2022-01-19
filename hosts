@@ -1,0 +1,11 @@
+[all:children]
+app
+db
+
+
+[app]
+vm2 ansible_host=192.168.3.237 ansible_user=root
+vm3 ansible_host=192.168.3.239 ansible_user=root
+
+[db]
+vm1 ansible_host=192.168.3.236 ansible_user=root version=12 data_dir=/srv/psql/12/main

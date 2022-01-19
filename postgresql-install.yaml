@@ -1,0 +1,51 @@
+#postgreesql
+- name: Install PostgreSQL
+  hosts: db
+
+  pre_tasks:
+    - name: Install dependencies
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      loop:
+        - postgresql-{{version}}
+    - name:
+      ansible.builtin.stat:
+         path: /var/lib/postgresql/12
+      register: pg
+
+
+  tasks:
+    - name: Stop service postgresql, if started
+      ansible.builtin.service:
+        name: postgresql
+        state: stopped
+
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        remote_src: yes
+        directory_mode: yes
+        src: /var/lib/postgresql/12
+        dest: /srv/psql
+        owner: postgres
+        group: postgres
+        mode: '700'
+      when: pg.stat.exists
+
+    - name: Delete old postgresql directory
+      ansible.builtin.file:
+        path: /var/lib/postgresql/12
+        state: absent
+      when: pg.stat.exists
+
+    - name: Change PostgreSQL data_directory
+      ansible.builtin.lineinfile:
+        path: /etc/postgresql/12/main/postgresql.conf
+        regexp: 'data_directory = '
+        line: "data_directory = '{{data_dir}}'"
+
+    - name: Start service postgresql, if started
+      ansible.builtin.service:
+        name: postgresql
+        state: started

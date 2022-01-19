@@ -1,0 +1,27 @@
+    - name: Install dependencies
+      ansible.builtin.package:
+        name: "{{item}}"
+        state: present
+      loop:
+        - yum-utils
+
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Install dependencies
+      ansible.builtin.package:
+        name: "{{item}}"
+        state: present
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: Start service postgresql, if started
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
